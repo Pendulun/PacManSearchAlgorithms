@@ -80,9 +80,8 @@ def getPathTo(node):
 
     parentNode = node[2]
     while not parentNode == None:
-        #print(f"This Node {node[0]}")
-        #print(f"Parent node of this Node: {parentNode[0]} Action to get to This Node: {node[1]}")
-        pathToNode.insert(0, node[1])
+        action = node[1]
+        pathToNode.insert(0, action)
         node = parentNode
         parentNode = node[2]
     
@@ -110,8 +109,7 @@ def depthFirstSearch(problem: SearchProblem):
 
     #Reached is a dict that keys represent the 2-uple of a Node already reached with None as a Value just because.
     # A reached node may or may not be at the frontier. It depends if it was explorated 
-    reached = {}
-    #reached[startState] = None
+    explored = {}
 
     #Path to goal is a ordered list of Actions representing the order of action that one have to take to reach the goal state
     #starting at the startState
@@ -119,15 +117,15 @@ def depthFirstSearch(problem: SearchProblem):
     foundGoal = False
     while not frontier.isEmpty():
         node = frontier.pop()      
-        reached[node[0]] = None
+        explored[node[0]] = None
         if problem.isGoalState(node[0]):
             pathToGoal = getPathTo(node)
             return pathToGoal
 
         nodeChilds = problem.getSuccessors(node[0])
         for child in nodeChilds:
-            if child[0] not in reached:
-                reached[child[0]] = 1
+            if child[0] not in explored:
+                #explored[child[0]] = 1
                 frontierNode = (child[0], child[1], node)
                 # if problem.isGoalState(child[0]):
                 #     pathToGoal = getPathTo(frontierNode)
