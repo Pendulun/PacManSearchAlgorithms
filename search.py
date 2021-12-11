@@ -75,15 +75,18 @@ def tinyMazeSearch(problem):
 
 
 def getPathTo(node):
-    "Get every Action necessary to go to the goal state via the parent nodes"
+    """
+    Get every Action necessary to go to the goal state (node) via the parent nodes.
+    Must have a root node (without parent)
+    All nodes must be dicts of {"position": (x,y), "lastActionTakenToGetToNode": "action", "parentNode": otherDict}
+    """
     pathToNode = []
-
-    parentNode = node[2]
+    parentNode = node["parentNode"]
+    #While it is not the root node
     while not parentNode == None:
-        action = node[1]
-        pathToNode.insert(0, action)
+        pathToNode.insert(0, node["lastActionTakenToGetToNode"])
         node = parentNode
-        parentNode = node[2]
+        parentNode = node["parentNode"]
     
     return pathToNode
 
@@ -103,34 +106,39 @@ def depthFirstSearch(problem: SearchProblem):
     """
     startState = problem.getStartState()
 
-    #Frontier is a Stack that contains 3-uples = (ThisNode, LastActionTakenToGetToNode, ParentNode)
+    #Frontier is a Stack that contains dicts of {"position": (x,y), "lastActionTakenToGetToNode": "action", "parentNode": otherDict}
     frontier = util.Stack()
-    frontier.push((startState, None, None))
+    frontier.push({
+        "position": startState,
+        "lastActionTakenToGetToNode": None,
+        "parentNode": None
+    })
 
-    #Reached is a dict that keys represent the 2-uple of a Node already reached with None as a Value just because.
-    # A reached node may or may not be at the frontier. It depends if it was explorated 
+    #explored is a dict of fully explored nodes which keys represent the 2-uple position of a Node already explored and None as a Value just because.
+    #A reached node may or may not be at the frontier. It depends if it was explorated 
     explored = {}
 
     #Path to goal is a ordered list of Actions representing the order of action that one have to take to reach the goal state
     #starting at the startState
     pathToGoal = []
-    foundGoal = False
     while not frontier.isEmpty():
-        node = frontier.pop()      
-        explored[node[0]] = None
-        if problem.isGoalState(node[0]):
-            pathToGoal = getPathTo(node)
-            return pathToGoal
+        node = frontier.pop()
 
-        nodeChilds = problem.getSuccessors(node[0])
-        for child in nodeChilds:
+        if problem.isGoalState(node["position"]):
+            return getPathTo(node)
+
+        #getSuccessors return a list of triples ((x,y),"action",cost)
+        for child in problem.getSuccessors(node["position"]):
             if child[0] not in explored:
-                #explored[child[0]] = 1
-                frontierNode = (child[0], child[1], node)
-                # if problem.isGoalState(child[0]):
-                #     pathToGoal = getPathTo(frontierNode)
-                #     break
+                frontierNode = {
+                    "position": child[0],
+                    "lastActionTakenToGetToNode": child[1],
+                    "parentNode": node
+                }
                 frontier.push(frontierNode)
+
+        #Mark node as explored as we checked all it's children      
+        explored[node["position"]] = None
 
     return pathToGoal
 
