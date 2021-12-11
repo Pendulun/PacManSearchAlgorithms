@@ -74,6 +74,20 @@ def tinyMazeSearch(problem):
     return [s, s, w, s, w, w, s, w]
 
 
+def getPathTo(node):
+    "Get every Action necessary to go to the goal state via the parent nodes"
+    pathToNode = []
+
+    parentNode = node[2]
+    while not parentNode == None:
+        #print(f"This Node {node[0]}")
+        #print(f"Parent node of this Node: {parentNode[0]} Action to get to This Node: {node[1]}")
+        pathToNode.insert(0, node[1])
+        node = parentNode
+        parentNode = node[2]
+    
+    return pathToNode
+
 def depthFirstSearch(problem: SearchProblem):
     """
     Search the deepest nodes in the search tree first.
@@ -89,44 +103,37 @@ def depthFirstSearch(problem: SearchProblem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     startState = problem.getStartState()
-    print(startState)
 
-    #Frontier is a Queue that contains 3-uples = (ThisNode, LastActionTakenToGetToNode, ParentNode)
-    frontier = util.Queue()
+    #Frontier is a Stack that contains 3-uples = (ThisNode, LastActionTakenToGetToNode, ParentNode)
+    frontier = util.Stack()
     frontier.push((startState, None, None))
 
-    #Reached is a dict that keys represent the 2-uple of a Node already reached with None as a Value just because 
+    #Reached is a dict that keys represent the 2-uple of a Node already reached with None as a Value just because.
+    # A reached node may or may not be at the frontier. It depends if it was explorated 
     reached = {}
-    reached[startState] = None
+    #reached[startState] = None
 
     #Path to goal is a ordered list of Actions representing the order of action that one have to take to reach the goal state
     #starting at the startState
     pathToGoal = []
+    foundGoal = False
     while not frontier.isEmpty():
-        node = frontier.pop()
-
+        node = frontier.pop()      
+        reached[node[0]] = None
         if problem.isGoalState(node[0]):
-            print(f"Node {node[0]} is goal state")
-            #Get every Action necessary to go to the goal state via the parent nodes
-            parentNode = node[2]
-            while not parentNode == None:
-                print(f"This Node {node[0]}")
-                print(f"Parent node of this Node: {parentNode[0]} Action to get to This Node: {node[1]}")
-                pathToGoal.insert(0, node[1])
-                node = parentNode
-                parentNode = node[2]
-            break
+            pathToGoal = getPathTo(node)
+            return pathToGoal
 
-        print(f"Filhos de: {node[0]}")
-        for child in problem.getSuccessors(node[0]):
-            print(child)
-            #Alguma coisa
+        nodeChilds = problem.getSuccessors(node[0])
+        for child in nodeChilds:
             if child[0] not in reached:
                 reached[child[0]] = 1
-                frontier.push((child[0], child[1], node))
+                frontierNode = (child[0], child[1], node)
+                # if problem.isGoalState(child[0]):
+                #     pathToGoal = getPathTo(frontierNode)
+                #     break
+                frontier.push(frontierNode)
 
-    #print(reached.items())
-    print(pathToGoal)
     return pathToGoal
 
 
