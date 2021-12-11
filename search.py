@@ -76,8 +76,8 @@ def tinyMazeSearch(problem):
 
 def getPathTo(node):
     """
-    Get every Action necessary to go to the goal state (node) via the parent nodes.
-    Must have a root node (without parent)
+    Get every Action necessary to go to the goal state (node) via it's parent nodes.
+    Must have a root node (a node with parentNode==None or lastActionTakenToGetToNode==None)
     All nodes must be dicts of {"position": (x,y), "lastActionTakenToGetToNode": "action", "parentNode": otherDict}
     """
     pathToNode = []
@@ -121,9 +121,6 @@ def depthFirstSearch(problem):
     #A reached node may or may not be at the frontier. It depends if it was explorated 
     explored = {}
 
-    #Path to goal is a ordered list of Actions representing the order of action that one have to take to reach the goal state
-    #starting at the startState
-    pathToGoal = []
     while not frontier.isEmpty():
         node = frontier.pop()
 
@@ -143,7 +140,8 @@ def depthFirstSearch(problem):
         #Mark node as explored as we checked all it's children      
         explored[node["position"]] = None
 
-    return pathToGoal
+    #returns a empty list of actions if could not find a goal
+    return []
 
 def nodeIsInQueue(myNode, myQueue: util.Queue):
     """
@@ -166,6 +164,7 @@ def breadthFirstSearch(problem):
     #Frontier is a Queue that contains dicts of {"position": (x,y),
     #                                            "lastActionTakenToGetToNode": "action",
     #                                            "parentNode": otherDict}
+    #It represents nodes yet to be explored
     
     frontier = util.Queue()
     frontier.push({
@@ -178,9 +177,6 @@ def breadthFirstSearch(problem):
     # explored and None as a Value just because.
     explored = {}
 
-    #Path to goal is a ordered list of Actions representing the order of action that one have to take to reach the goal state
-    #starting at the startState
-    pathToGoal = []
     while not frontier.isEmpty():
         node = frontier.pop()
 
@@ -202,7 +198,8 @@ def breadthFirstSearch(problem):
         #Mark node as explored as we checked all it's children      
         explored[node["position"]] = None
 
-    return pathToGoal
+    #returns a empty list of actions if could not find a goal
+    return []
 
 
 def uniformCostSearch(problem):
