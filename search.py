@@ -143,12 +143,9 @@ def depthFirstSearch(problem):
     #returns a empty list of actions if could not find a goal
     return []
 
-def nodeIsInQueue(myNode, myQueue: util.Queue):
+def nodeIsInQueue(myNode, myQueue):
     """
-    Checks if any node of type {"position": (x,y),
-                                "lastActionTakenToGetToNode": "action",
-                                "parentNode": otherDict}
-    
+    Checks if any node, that is a dict with a 'position' key, 
     in the Queue has a node["position"] == myNode
     """
     for node in myQueue.list:
@@ -186,13 +183,13 @@ def breadthFirstSearch(problem):
 
         #getSuccessors return a list of triples ((x,y),"action",cost)
         for child in problem.getSuccessors(node["position"]):
-            frontierNode = {
+            #If the child has not been explored and is not already in the queue to be explored
+            if child[0] not in explored and not nodeIsInQueue(child[0], frontier):
+                frontierNode = {
                     "position": child[0],
                     "lastActionTakenToGetToNode": child[1],
                     "parentNode": node
                 }
-            #If the child has not been explored and is not already in the queue to be explored
-            if child[0] not in explored and not nodeIsInQueue(child[0], frontier):
                 frontier.push(frontierNode)
 
         #Mark node as explored as we checked all it's children      
@@ -202,10 +199,76 @@ def breadthFirstSearch(problem):
     return []
 
 
+def getPathToDict(goalNode, nodesInfo):
+    """
+    Get every Action necessary to go to the goalNode via it's parent nodes.
+    All nodes must be dicts of {"cost": 0, "parent":None, "lastActionTakenToGetToNode": None, "explored":False}
+    Must exist a root node (a node with parentNode==None or lastActionTakenToGetToNode==None)
+    and nodesInfo must be a dict of dicts in the form:
+    {(x,y): {"cost": z, "parent":(x2, y2), "lastActionTakenToGetToNode": "action", "explored":True/False}}
+    The parent of a node must also be in nodesInfo
+    """
+    thisNode = goalNode
+    parentNode = nodesInfo[thisNode]['parent']
+    pathToNode = []
+    while not parentNode == None:
+        pathToNode.insert(0, nodesInfo[thisNode]['lastActionTakenToGetToNode'])
+        thisNode = parentNode
+        parentNode = nodesInfo[thisNode]['parent']
+    
+    return pathToNode
+
+
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    startState = problem.getStartState()
+
+    #PriorityQueue with (x,y) as keys and path cost to node as priority
+    frontierQueue = util.PriorityQueue()
+    frontierQueue.push(startState, 0)
+
+    #nodesInfo is a dict of dicts for information of nodes:
+    #{(x,y): {"cost": z, "parent":(x2, y2), "lastActionTakenToGetToNode": "action", "explored":True/False},}
+    #Represents information about nodes. If a node is in it, it was reached ("explored": False) or fully explored ("explored":True)
+    nodesInfo = {}
+    nodesInfo[startState] = {"cost": 0, "parent":None, "lastActionTakenToGetToNode": None, "explored":False}
+
+    while not frontierQueue.isEmpty():
+        node = frontierQueue.pop()
+        nodeCost = nodesInfo[node]["cost"]
+
+        #Late goal test
+        if problem.isGoalState(node):
+            return getPathToDict(node, nodesInfo)
+
+        #getSuccessors returns a list of triples ((x,y),"action",cost)
+        for child in problem.getSuccessors(node):
+            totalCostPathToChild = nodeCost+child[2]
+
+            #If the child has not been explored and is not already in the queue to be explored
+            #this is, have not been reached
+            if child[0] not in nodesInfo:
+                thisChildInfo = {"cost": totalCostPathToChild,
+                            "parent":node, 
+                            "lastActionTakenToGetToNode": child[1],
+                            "explored": False
+                }
+                frontierQueue.push(child[0], totalCostPathToChild)
+                nodesInfo[child[0]] = thisChildInfo
+
+            #Child was already reached and it's cost is higher than the one from this parent node
+            elif not nodesInfo[child[0]]['explored'] and nodesInfo[child[0]]['cost'] > totalCostPathToChild:
+                nodesInfo[child[0]]['cost'] = totalCostPathToChild
+                nodesInfo[child[0]]['parent'] = node
+                nodesInfo[child[0]]['lastActionTakenToGetToNode'] = child[1]
+                frontierQueue.update(child[0], totalCostPathToChild)
+
+        #Mark node as explored as we checked all it's children      
+        nodesInfo[node]['explored'] = True
+
+    #returns a empty list of actions if could not find a goal
+    return []
+
 
 
 def nullHeuristic(state, problem=None):
