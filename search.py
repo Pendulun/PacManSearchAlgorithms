@@ -90,7 +90,7 @@ def getPathTo(node):
     
     return pathToNode
 
-def depthFirstSearch(problem: SearchProblem):
+def depthFirstSearch(problem):
     """
     Search the deepest nodes in the search tree first.
 
@@ -106,7 +106,10 @@ def depthFirstSearch(problem: SearchProblem):
     """
     startState = problem.getStartState()
 
-    #Frontier is a Stack that contains dicts of {"position": (x,y), "lastActionTakenToGetToNode": "action", "parentNode": otherDict}
+    #Frontier is a Stack that contains dicts of {"position": (x,y),
+    #                                            "lastActionTakenToGetToNode": "action",
+    #                                            "parentNode": otherDict}
+
     frontier = util.Stack()
     frontier.push({
         "position": startState,
@@ -142,11 +145,64 @@ def depthFirstSearch(problem: SearchProblem):
 
     return pathToGoal
 
+def nodeIsInQueue(myNode, myQueue: util.Queue):
+    """
+    Checks if any node of type {"position": (x,y),
+                                "lastActionTakenToGetToNode": "action",
+                                "parentNode": otherDict}
+    
+    in the Queue has a node["position"] == myNode
+    """
+    for node in myQueue.list:
+        if node["position"] == myNode:
+            return True
+    
+    return False
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    startState = problem.getStartState()
+
+    #Frontier is a Queue that contains dicts of {"position": (x,y),
+    #                                            "lastActionTakenToGetToNode": "action",
+    #                                            "parentNode": otherDict}
+    
+    frontier = util.Queue()
+    frontier.push({
+        "position": startState,
+        "lastActionTakenToGetToNode": None,
+        "parentNode": None
+    })
+
+    #explored is a dict of fully explored nodes which Keys represent the 2-uple position of a Node already 
+    # explored and None as a Value just because.
+    explored = {}
+
+    #Path to goal is a ordered list of Actions representing the order of action that one have to take to reach the goal state
+    #starting at the startState
+    pathToGoal = []
+    while not frontier.isEmpty():
+        node = frontier.pop()
+
+        #Late goal test
+        if problem.isGoalState(node["position"]):
+            return getPathTo(node)
+
+        #getSuccessors return a list of triples ((x,y),"action",cost)
+        for child in problem.getSuccessors(node["position"]):
+            frontierNode = {
+                    "position": child[0],
+                    "lastActionTakenToGetToNode": child[1],
+                    "parentNode": node
+                }
+            #If the child has not been explored and is not already in the queue to be explored
+            if child[0] not in explored and not nodeIsInQueue(child[0], frontier):
+                frontier.push(frontierNode)
+
+        #Mark node as explored as we checked all it's children      
+        explored[node["position"]] = None
+
+    return pathToGoal
 
 
 def uniformCostSearch(problem):
