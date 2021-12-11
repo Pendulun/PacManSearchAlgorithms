@@ -270,7 +270,6 @@ def uniformCostSearch(problem):
     return []
 
 
-
 def nullHeuristic(state, problem=None):
     """
     A heuristic function estimates the cost from the current state to the nearest
@@ -278,11 +277,44 @@ def nullHeuristic(state, problem=None):
     """
     return 0
 
-
 def greedySearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest heuristic first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    startState = problem.getStartState()
+
+    #PriorityQueue with (x,y) as keys and path cost to node as priority
+    frontierQueue = util.PriorityQueue()
+    frontierQueue.push(startState, 0)
+    #nodesInfo is a dict of dicts for information of nodes:
+    #{(x,y): {"cost": z, "parent":(x2, y2), "lastActionTakenToGetToNode": "action", "explored":True/False},}
+    #Represents information about nodes. If a node is in it, it was reached ("explored": False) or fully explored ("explored":True)
+    nodesInfo = {}
+    nodesInfo[startState] = {"parent":None, "lastActionTakenToGetToNode": None, "explored":False}
+
+    while not frontierQueue.isEmpty():
+        node = frontierQueue.pop()
+
+        #Late goal test
+        if problem.isGoalState(node):
+            return getPathToDict(node, nodesInfo)
+
+        #getSuccessors returns a list of triples ((x,y),"action",cost)
+        for child in problem.getSuccessors(node):
+
+            #If the child has not been explored and is not already in the queue to be explored
+            #this is, have not been reached
+            if child[0] not in nodesInfo:
+                thisChildInfo = {"parent":node, 
+                                "lastActionTakenToGetToNode": child[1],
+                                "explored": False
+                }
+                frontierQueue.push(child[0], heuristic(child[0], problem))
+                nodesInfo[child[0]] = thisChildInfo
+
+        #Mark node as explored as we checked all it's children      
+        nodesInfo[node]['explored'] = True
+
+    #returns a empty list of actions if could not find a goal
+    return []
 
 
 def aStarSearch(problem, heuristic=nullHeuristic):
