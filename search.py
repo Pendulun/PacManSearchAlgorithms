@@ -122,23 +122,23 @@ def depthFirstSearch(problem):
     explored = {}
 
     while not frontier.isEmpty():
-        node = frontier.pop()
+        currentNode = frontier.pop()
 
-        if problem.isGoalState(node["position"]):
-            return getPathTo(node)
+        if problem.isGoalState(currentNode["position"]):
+            return getPathTo(currentNode)
 
         #getSuccessors return a list of triples ((x,y),"action",cost)
-        for child in problem.getSuccessors(node["position"]):
+        for child in problem.getSuccessors(currentNode["position"]):
             if child[0] not in explored:
                 frontierNode = {
                     "position": child[0],
                     "lastActionTakenToGetToNode": child[1],
-                    "parentNode": node
+                    "parentNode": currentNode
                 }
                 frontier.push(frontierNode)
 
         #Mark node as explored as we checked all it's children      
-        explored[node["position"]] = None
+        explored[currentNode["position"]] = None
 
     #returns a empty list of actions if could not find a goal
     return []
@@ -175,25 +175,25 @@ def breadthFirstSearch(problem):
     explored = {}
 
     while not frontier.isEmpty():
-        node = frontier.pop()
+        currentNode = frontier.pop()
 
         #Late goal test
-        if problem.isGoalState(node["position"]):
-            return getPathTo(node)
+        if problem.isGoalState(currentNode["position"]):
+            return getPathTo(currentNode)
 
         #getSuccessors return a list of triples ((x,y),"action",cost)
-        for child in problem.getSuccessors(node["position"]):
+        for child in problem.getSuccessors(currentNode["position"]):
             #If the child has not been explored and is not already in the queue to be explored
             if child[0] not in explored and not nodeIsInQueue(child[0], frontier):
                 frontierNode = {
                     "position": child[0],
                     "lastActionTakenToGetToNode": child[1],
-                    "parentNode": node
+                    "parentNode": currentNode
                 }
                 frontier.push(frontierNode)
 
         #Mark node as explored as we checked all it's children      
-        explored[node["position"]] = None
+        explored[currentNode["position"]] = None
 
     #returns a empty list of actions if could not find a goal
     return []
@@ -204,17 +204,17 @@ def getPathToDict(goalNode, nodesInfo):
     Get every Action necessary to go to the goalNode via it's parent nodes.
     All nodes must be dicts of {"cost": 0, "parent":None, "lastActionTakenToGetToNode": None, "explored":False}
     Must exist a root node (a node with parentNode==None or lastActionTakenToGetToNode==None)
-    and nodesInfo must be a dict of dicts in the form:
-    {(x,y): {"cost": z, "parent":(x2, y2), "lastActionTakenToGetToNode": "action", "explored":True/False}}
+    and nodesInfo must be a dict of dicts at least in the form:
+    {(x,y): {"parent":(x2, y2), "lastActionTakenToGetToNode": "action"}}
     The parent of a node must also be in nodesInfo
     """
-    thisNode = goalNode
-    parentNode = nodesInfo[thisNode]['parent']
+    currentNode = goalNode
+    parentNode = nodesInfo[currentNode]['parent']
     pathToNode = []
     while not parentNode == None:
-        pathToNode.insert(0, nodesInfo[thisNode]['lastActionTakenToGetToNode'])
-        thisNode = parentNode
-        parentNode = nodesInfo[thisNode]['parent']
+        pathToNode.insert(0, nodesInfo[currentNode]['lastActionTakenToGetToNode'])
+        currentNode = parentNode
+        parentNode = nodesInfo[currentNode]['parent']
     
     return pathToNode
 
@@ -285,7 +285,7 @@ def greedySearch(problem, heuristic=nullHeuristic):
     frontierQueue = util.PriorityQueue()
     frontierQueue.push(startState, 0)
     #nodesInfo is a dict of dicts for information of nodes:
-    #{(x,y): {"cost": z, "parent":(x2, y2), "lastActionTakenToGetToNode": "action", "explored":True/False},}
+    #{(x,y): {"parent":(x2, y2), "lastActionTakenToGetToNode": "action", "explored":True/False},}
     #Represents information about nodes. If a node is in it, it was reached ("explored": False) or fully explored ("explored":True)
     nodesInfo = {}
     nodesInfo[startState] = {"parent":None, "lastActionTakenToGetToNode": None, "explored":False}
@@ -326,7 +326,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     frontierQueue.push(startState, 0)
 
     #nodesInfo is a dict of dicts for information of nodes:
-    #{(x,y): {"cost": z, "parent":(x2, y2), "lastActionTakenToGetToNode": "action", "explored":True/False},}
+    #{(x,y): {"pathCost": z, "parent":(x2, y2), "lastActionTakenToGetToNode": "action", "explored":True/False},}
     #Represents information about nodes. If a node is in it, it was reached ("explored": False) or fully explored ("explored":True)
     nodesInfo = {}
     nodesInfo[startState] = {"pathCost": 0, "parent":None, "lastActionTakenToGetToNode": None, "explored":False}
