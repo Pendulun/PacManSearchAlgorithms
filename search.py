@@ -234,22 +234,22 @@ def uniformCostSearch(problem):
     nodesInfo[startState] = {"cost": 0, "parent":None, "lastActionTakenToGetToNode": None, "explored":False}
 
     while not frontierQueue.isEmpty():
-        node = frontierQueue.pop()
-        nodeCost = nodesInfo[node]["cost"]
+        currentNode = frontierQueue.pop()
+        nodeCost = nodesInfo[currentNode]["cost"]
 
         #Late goal test
-        if problem.isGoalState(node):
-            return getPathToDict(node, nodesInfo)
+        if problem.isGoalState(currentNode):
+            return getPathToDict(currentNode, nodesInfo)
 
         #getSuccessors returns a list of triples ((x,y),"action",cost)
-        for child in problem.getSuccessors(node):
+        for child in problem.getSuccessors(currentNode):
             totalCostPathToChild = nodeCost+child[2]
 
             #If the child has not been explored and is not already in the queue to be explored
             #this is, have not been reached
             if child[0] not in nodesInfo:
                 thisChildInfo = {"cost": totalCostPathToChild,
-                            "parent":node, 
+                            "parent":currentNode, 
                             "lastActionTakenToGetToNode": child[1],
                             "explored": False
                 }
@@ -259,12 +259,12 @@ def uniformCostSearch(problem):
             #Child was already reached and it's cost is higher than the one from this parent node
             elif not nodesInfo[child[0]]['explored'] and nodesInfo[child[0]]['cost'] > totalCostPathToChild:
                 nodesInfo[child[0]]['cost'] = totalCostPathToChild
-                nodesInfo[child[0]]['parent'] = node
+                nodesInfo[child[0]]['parent'] = currentNode
                 nodesInfo[child[0]]['lastActionTakenToGetToNode'] = child[1]
                 frontierQueue.update(child[0], totalCostPathToChild)
 
         #Mark node as explored as we checked all it's children      
-        nodesInfo[node]['explored'] = True
+        nodesInfo[currentNode]['explored'] = True
 
     #returns a empty list of actions if could not find a goal
     return []
@@ -291,19 +291,19 @@ def greedySearch(problem, heuristic=nullHeuristic):
     nodesInfo[startState] = {"parent":None, "lastActionTakenToGetToNode": None, "explored":False}
 
     while not frontierQueue.isEmpty():
-        node = frontierQueue.pop()
+        currentNode = frontierQueue.pop()
 
         #Late goal test
-        if problem.isGoalState(node):
-            return getPathToDict(node, nodesInfo)
+        if problem.isGoalState(currentNode):
+            return getPathToDict(currentNode, nodesInfo)
 
         #getSuccessors returns a list of triples ((x,y),"action",cost)
-        for child in problem.getSuccessors(node):
+        for child in problem.getSuccessors(currentNode):
 
             #If the child has not been explored and is not already in the queue to be explored
             #this is, have not been reached
             if child[0] not in nodesInfo:
-                thisChildInfo = {"parent":node, 
+                thisChildInfo = {"parent":currentNode, 
                                 "lastActionTakenToGetToNode": child[1],
                                 "explored": False
                 }
@@ -311,7 +311,7 @@ def greedySearch(problem, heuristic=nullHeuristic):
                 nodesInfo[child[0]] = thisChildInfo
 
         #Mark node as explored as we checked all it's children      
-        nodesInfo[node]['explored'] = True
+        nodesInfo[currentNode]['explored'] = True
 
     #returns a empty list of actions if could not find a goal
     return []
@@ -319,8 +319,52 @@ def greedySearch(problem, heuristic=nullHeuristic):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    startState = problem.getStartState()
+
+    #PriorityQueue with (x,y) as keys and path cost to node as priority
+    frontierQueue = util.PriorityQueue()
+    frontierQueue.push(startState, 0)
+
+    #nodesInfo is a dict of dicts for information of nodes:
+    #{(x,y): {"cost": z, "parent":(x2, y2), "lastActionTakenToGetToNode": "action", "explored":True/False},}
+    #Represents information about nodes. If a node is in it, it was reached ("explored": False) or fully explored ("explored":True)
+    nodesInfo = {}
+    nodesInfo[startState] = {"pathCost": 0, "parent":None, "lastActionTakenToGetToNode": None, "explored":False}
+
+    while not frontierQueue.isEmpty():
+        currentNode = frontierQueue.pop()
+        nodeCost = nodesInfo[currentNode]["pathCost"]
+
+        #Late goal test
+        if problem.isGoalState(currentNode):
+            return getPathToDict(currentNode, nodesInfo)
+
+        #getSuccessors returns a list of triples ((x,y),"action",cost)
+        for child in problem.getSuccessors(currentNode):
+            #If node was not explored
+            if child[0] not in nodesInfo or (child[0] in nodesInfo and not nodesInfo[child[0]]['explored']):
+                heuristicCost = heuristic(child[0], problem)
+                #if node was not reached
+                if child[0] not in nodesInfo:
+                    totalPathCostToChild = nodeCost+child[2]
+                    costWithHeuristic = totalPathCostToChild + heuristicCost
+                    nodeInfo = {"pathCost": totalPathCostToChild, 
+                                    "parent": currentNode,
+                                    "lastActionTakenToGetToNode": child[1],
+                                    "explored": False}
+                    nodesInfo[child[0]] = nodeInfo
+                    frontierQueue.push(child[0], costWithHeuristic)
+                elif nodeCost + child[2] < nodesInfo[child[0]]['pathCost']:
+                    nodesInfo[child[0]]['pathCost'] = nodeCost + child[2]
+                    nodesInfo[child[0]]['parent'] = currentNode
+                    nodesInfo[child[0]]["lastActionTakenToGetToNode"] = child[1]
+                    frontierQueue.update(child[0], nodesInfo[child[0]]['pathCost'] + heuristicCost)
+
+        #Mark node as explored as we checked all it's children      
+        nodesInfo[currentNode]['explored'] = True
+
+    #returns a empty list of actions if could not find a goal
+    return []
 
 
 def foodHeuristic(state, problem):
