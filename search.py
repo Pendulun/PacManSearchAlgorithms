@@ -397,113 +397,15 @@ def foodHeuristic(state, problem):
     problem.heuristicInfo['wallCount']
     """
     position, foodGrid = state
-
+    
     goalList = foodGrid.asList()
-
     numGoals = len(goalList)
     if numGoals == 0:
         return 0
 
-    #print(f"Posicao: {position}, Comidas {foodList}")
-    #distances = [euclidianDistance(position, food) for food in goalList]
-
     distances = [util.manhattanDistance(position, food) for food in goalList]
 
-    #MAN = 11254
     result = sum(distances)/numGoals
-
-    #MAN=13898 - NÃO ADMISSÍVEL
-    # if numGoals == 1:
-    #     return  (sum(distances)/numGoals)     
-    # result =  (sum(distances)/numGoals)*(1-(1/log(numGoals)))
-
-    #MAN=13389 - NÃO ADMISSÍVEL
-    #Total distâncias dividido pelo número de goals vezes um peso do número de goals
-    # if numGoals == 1:
-    #     return distances[0]
-    # result = sum(distances)/(numGoals*log(numGoals))
-
-    #MAN=12517
-    #Número de goals sobrando
-    # result = numGoals
-
-    #MAN = 14099 - ACHO QUE NÃO ADMISSÍVEL
-    #Média distâncias vezes um peso com log que diminui quanto menos goals
-    # if numGoals == 1:
-    #     return distances[0]
-    # result = ((sum(distances)/numGoals)*(1-(1/log(numGoals))))
-
-    #MAN=11876 - ACHO QUE NÃO ADMISSÍVEL
-    #Média distâncias vezes um peso que diminui quanto menos goals
-    # result = (sum(distances)/numGoals)*(1-(1/numGoals))
-
-    #MAN=15423
-    #Mínima distância vezes um peso que diminui quanto menos goals sobrando
-    #result = min(distances)*(1-(1/numGoals))
-
-    #MAN=13898
-    #Mínima distância
-    #result = min(distances)
-
-    #MAN = 16237
-    #Mínima distância dividido pelo número de goals
-    #result = min(distances)/numGoals
-
-    #MAN=13972
-    #Mínima distância vezes um peso < 1 que leva em consideração a média das distâncias
-    #result = min(distances) * (1-(1/(sum(distances)/numGoals)))
-
-    #MAN=16457
-    #Mínima distância vezes um peso < 1 que leva em consideração a média das distâncias
-    #result = min(distances) * (1/(sum(distances)/numGoals))
-
-    #MAN=13972
-    #Mínima distância vezes um peso < 1 que leva em consideração a maior distância
-    #result = min(distances) * (1-(1/max(distances)))
-
-    #MAN=16457
-    #Mínima distância vezes um peso < 1 que leva em consideração a maior distância
-    #result = min(distances) * (1/max(distances))
-    
-    #MAN=13971
-    #Mínima distância vezes um peso < 1 que leva em consideração a média das distâncias sem contar a mínima distância
-    # minimo = min(distances)
-    # if numGoals == 1:
-    #     return minimo
-    # distances.remove(minimo)
-    # result = minimo*(1-1/(sum(distances)/(numGoals-1)))
-    
-    #MAN=16447
-    #Mínima distância vezes um peso < 1 que leva em consideração a média das distâncias sem contar a mínima distância
-    # minimo = min(distances)
-    # if numGoals == 1:
-    #     return minimo
-    # distances.remove(minimo)
-    # result = minimo*(1/(sum(distances)/(numGoals-1)))
-
-    #MAN=15875
-    #
-    # minimo = min(distances)
-    # maximo = max(distances)
-    # if numGoals == 1 or minimo == maximo:
-    #     return minimo
-    # result = minimo*(1/((max(distances)-minimo)/2))
-
-    #MAN=13806 - NÃO CONSISTENTE
-    #
-    # numberNeighboorGoals = 0
-    # for goal in goalList:
-    #     if goal in [(position[0]+1, position[1]),
-    #                 (position[0]-1, position[1]),
-    #                 (position[0], position[1]+1),
-    #                 (position[0], position[1]-1)]:
-    #                 numberNeighboorGoals+=1
-    # if numberNeighboorGoals==0:
-    #     return min(distances)
-    
-    # result = min(distances)*(1-(1/numberNeighboorGoals))
-
-    #print(result)
     return result
 
 
