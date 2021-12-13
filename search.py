@@ -397,7 +397,6 @@ def foodHeuristic(state, problem):
     problem.heuristicInfo['wallCount']
     """
     position, foodGrid = state
-    
     goalList = foodGrid.asList()
     numGoals = len(goalList)
     if numGoals == 0:
